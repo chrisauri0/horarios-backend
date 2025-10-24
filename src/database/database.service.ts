@@ -3,20 +3,24 @@ import { ConfigService } from '@nestjs/config';
 import { neon } from '@neondatabase/serverless';
 
 @Injectable()
-export class DatabaseService implements OnModuleDestroy {
+export class DatabaseService   {
   private readonly logger = new Logger(DatabaseService.name);
-  private readonly sql: ReturnType<typeof neon>;
+  private readonly sql;
 
   constructor(private configService: ConfigService) {
-    const databaseUrl = this.configService.get<string>('DATABASE_URL');
+    const databaseUrl = this.configService.get('DATABASE_URL');
     if (!databaseUrl) {
       throw new Error('DATABASE_URL no está definido');
     }
 
-    // neon(databaseUrl) devuelve una función tag template para hacer queries
+   
     this.sql = neon(databaseUrl);
     this.logger.log('Neon client inicializado');
   }
+   async getData() {
+        const data = await this.sql`...`;
+        return data;
+    }
 
   // Ejemplo: obtener filas
   async query<T = any>(query: TemplateStringsArray, ...params: any[]): Promise<T[]> {
@@ -31,12 +35,5 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // Si en algún caso necesitas cerrar (normalmente no necesario en serverless)
-  async onModuleDestroy() {
-    try {
-      // Si el cliente ofreciera un close, lo ejecutaríamos aquí. Neon serverless no expone close en la versión típica.
-      this.logger.log('DatabaseService destroy');
-    } catch (err) {
-      this.logger.error('Error on destroy DB', err as any);
-    }
-  }
+  
 }
