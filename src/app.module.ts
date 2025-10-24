@@ -2,15 +2,15 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
+import { PrismaModule } from '../prisma/prisma.model';
 
 @Module({
   imports: [
-    // Carga variables de entorno (.env)
     ConfigModule.forRoot({
-      isGlobal: true, // hace que ConfigService esté disponible en toda la app
+      isGlobal: true,
+      
     }),
-
-    // Módulo de conexión Neon
+PrismaModule,
     DatabaseModule,
 
     // Módulo de usuarios
