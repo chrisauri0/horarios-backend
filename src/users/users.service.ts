@@ -1,25 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
+// import { DatabaseService } from '../database/database.service';
+import { PrismaService } from '../../prisma/prisma.service';
+
 
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) {}
+  constructor( private prisma: PrismaService) {}
+
 
   async findAll() {
-    return this.db.query`SELECT id, name, email FROM users ORDER BY id`;
+    return this.prisma.users.findMany();
   }
+
 
   async findByEmail(email: string) {
-    return this.db.queryOne`SELECT id, name, email FROM users WHERE email = ${email}`;
+    return this.prisma.users.findUnique({
+      where: { email },
+    });
   }
 
-  async create(data: { name: string; email: string }) {
-    const { name, email } = data;
-    const res = await this.db.query`
-      INSERT INTO users (name, email)
-      VALUES (${name}, ${email})
-      RETURNING id, name, email
-    `;
-    return res[0];
+  async findById(id: string) {
+    return this.prisma.users.findUnique({
+      where: { id },
+    });
+  }
+
+  async create(data: {
+    email: string;
+    passwordHash: string;
+    fullName?: string;
+    role?: string;
+    metadata?: object;
+  }) {
+    return this.prisma.users.create({
+      data: {
+        email: data.email,
+        password_hash: data.passwordHash,
+        full_name: data.fullName,
+        role: data.role,
+        metadata: data.metadata,
+      },
+    });
+  }
+
+  async update(id: string, data: Partial<{
+    email: string;
+    passwordHash: string;
+    fullName?: string;
+    role?: string;
+    metadata?: object;
+  }>) {
+    return this.prisma.users.update({
+      where: { id },
+      data: {
+        email: data.email,
+        password_hash: data.passwordHash,
+        full_name: data.fullName,
+        role: data.role,
+        metadata: data.metadata,
+      },
+    });
+  }
+
+  async delete(id: string) {
+    return this.prisma.users.delete({
+      where: { id },
+    });
   }
 }
+
+      
+
