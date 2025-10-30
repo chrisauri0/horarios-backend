@@ -7,6 +7,8 @@ import { GruposModule } from './grupos/grupos.module';
 import { ProfesoresModule } from './profesores/profesores.module';
 import { SalonesModule } from './salones/salones.module';
 import { HorariosModule } from './horarios/horarios.module';
+import { AuthModule } from './auth/auth.module';
+import { MateriasModule } from './materias/materias.module';
 
 @Module({
   imports: [
@@ -27,6 +29,10 @@ PrismaModule,
     SalonesModule,
 
     HorariosModule,
+
+    AuthModule,
+
+    MateriasModule,
   ],
 })
 export class AppModule {}
