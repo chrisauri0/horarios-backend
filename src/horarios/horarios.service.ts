@@ -10,7 +10,7 @@ export class HorariosService {
     async findAll() {
         return this.prisma.horarios.findMany();
     }
-        async compareHorario(id: number, newData: { nombregrupo?: string; data?: object }) {
+        async compareHorario(id: string, newData: { nombregrupo?: string; data?: object }) {
         const horario = await this.findById(id);
         if (!horario) {
             return { error: 'Horario no encontrado' };
@@ -29,7 +29,7 @@ export class HorariosService {
         }
     }
 
-    async findById(id: number) {
+    async findById(id: string) {
         return this.prisma.horarios.findUnique({
             where: { id },
         });
@@ -44,7 +44,7 @@ export class HorariosService {
         });
     }
 
-    async update(id: number, data: Partial<{
+    async update(id: string, data: Partial<{
         nombregrupo: string;
         data: object;
     }>) {
@@ -54,7 +54,7 @@ export class HorariosService {
         });
     }
 
-    async delete(id: number) {
+    async delete(id: string) {
         return this.prisma.horarios.delete({
             where: { id },
         });
