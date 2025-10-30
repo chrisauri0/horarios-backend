@@ -10,11 +10,16 @@ export class SalonesService {
         return this.prisma.salones.findMany();
     }
 
-    async findById(id: number) {
+    async findById(id: string) {
         return this.prisma.salones.findUnique({
             where: { id },
         });
     }
+    async findByNombreYEdificio(nombre_salon: string, nombre_edificio: string) {
+  return this.prisma.salones.findFirst({
+    where: { nombre_salon, nombre_edificio }
+  });
+}
 
     async create(data: {
         nombre_salon: string;
@@ -26,7 +31,7 @@ export class SalonesService {
         });
     }
 
-    async update(id: number, data: Partial<{
+    async update(id: string, data: Partial<{
         nombre_salon: string;
         nombre_edificio: string;
         data: object;
@@ -37,7 +42,7 @@ export class SalonesService {
         });
     }
 
-    async delete(id: number) {
+    async delete(id: string) {
         return this.prisma.salones.delete({
             where: { id },
         });

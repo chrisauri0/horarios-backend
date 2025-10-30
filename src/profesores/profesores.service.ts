@@ -1,20 +1,29 @@
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-
 
 @Injectable()
 export class ProfesoresService {
     constructor(private prisma: PrismaService) {}
 
+    async findAllTutors() {
+        console.log('→ Ejecutando findAllTutors');
+        return this.prisma.profesores.findMany({
+            where: { can_be_tutor: true },
+        });
+    }
+
     async findAll() {
         return this.prisma.profesores.findMany();
     }
 
-    async findById(profesor_id: string) {
+    async findById(id: string) {
+        console.log('→ Ejecutando findById con id:', id);
         return this.prisma.profesores.findUnique({
-            where: { profesor_id },
+            where: { id },
         });
     }
+
 
     async create(data: {
         nombre: string;
@@ -29,7 +38,7 @@ export class ProfesoresService {
         });
     }
 
-    async update(profesor_id: string, data: Partial<{
+    async update(id: string, data: Partial<{
         nombre: string;
         apellidos: string;
         email: string;
@@ -38,14 +47,14 @@ export class ProfesoresService {
         metadata?: object;
     }>) {
         return this.prisma.profesores.update({
-            where: { profesor_id },
+            where: { id },
             data,
         });
     }
 
-    async delete(profesor_id: string) {
+    async delete(id: string) {
         return this.prisma.profesores.delete({
-            where: { profesor_id },
+            where: { id },
         });
     }
 }

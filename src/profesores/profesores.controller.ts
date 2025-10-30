@@ -1,7 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { ProfesoresService } from './profesores.service';
 import { Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../auth/roles/roles.guard';
 
+
+  
+// @UseGuards(RolesGuard)
 @Controller('profesores')
 export class ProfesoresController {
   constructor(private readonly profesoresService: ProfesoresService) {}
@@ -10,11 +15,17 @@ export class ProfesoresController {
   async getAll() {
     return this.profesoresService.findAll();
   }
+  
+  @Get('/tutores')
+  async getAllTutors() {
+    return this.profesoresService.findAllTutors();
+  }
 
   @Get(':id')
   async getById(@Param('id') profesor_id: string) {
     return this.profesoresService.findById(profesor_id);
   }
+
 
   @Post()
   async create(@Body() body: {

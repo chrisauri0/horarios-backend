@@ -11,25 +11,29 @@ export class SalonesController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: number) {
+  async getById(@Param('id') id: string) {
     return this.salonesService.findById(id);
   }
 
   @Post()
-  async create(@Body() body: { nombre_salon: string; nombre_edificio: string; data: object }) {
-    return this.salonesService.create(body);
+async create(@Body() body: { nombre_salon: string; nombre_edificio: string; data: object }) {
+  const exists = await this.salonesService.findByNombreYEdificio(body.nombre_salon, body.nombre_edificio);
+  if (exists) {
+    return { error: 'Ya existe un salón con ese nombre y edificio.' };
   }
+  return this.salonesService.create(body);
+}
 
   @Patch(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() body: Partial<{ nombre_salon: string; nombre_edificio: string; data: object }>
   ) {
     return this.salonesService.update(id, body);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id') id: string) {
     return this.salonesService.delete(id);
   }
 }
