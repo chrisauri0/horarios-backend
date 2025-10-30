@@ -7,14 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Habilitar CORS
-  app.enableCors();
+  app.enableCors({ origin: 'http://localhost:4200' });
 
-  // Validación global de DTOs
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
 
   // Prisma shutdown hooks
   const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
 
   // Usar puerto de variable de entorno
   const port = process.env.PORT || 3000;
