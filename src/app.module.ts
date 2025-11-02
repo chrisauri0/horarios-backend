@@ -9,6 +9,8 @@ import { SalonesModule } from './salones/salones.module';
 import { HorariosModule } from './horarios/horarios.module';
 import { AuthModule } from './auth/auth.module';
 import { MateriasModule } from './materias/materias.module';
+import { PythonModule } from './python/python.module';
+
 
 @Module({
   imports: [
@@ -19,7 +21,6 @@ import { MateriasModule } from './materias/materias.module';
 PrismaModule,
     DatabaseModule,
 
-    // Módulo de usuarios
     UsersModule,
 
     GruposModule,
@@ -33,6 +34,7 @@ PrismaModule,
     AuthModule,
 
     MateriasModule,
+    PythonModule,
   ],
 })
 export class AppModule {}

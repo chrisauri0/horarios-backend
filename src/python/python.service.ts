@@ -5,14 +5,8 @@ import { join } from 'path';
 @Injectable()
 export class PythonService {
   private readonly logger = new Logger(PythonService.name);
-  private readonly PYTHON_BIN = process.env.PYTHON_BIN || 'python3'; // o 'python'
-
-  /**
-   * Ejecuta un script Python y devuelve stdout como string.
-   * args: array de argumentos (si necesitas pasar datos, preferible serializar JSON y pasarlo por stdin)
-   * timeoutMs: tiempo máximo en ms para esperar (reject si excede)
-   */
-  runScript(scriptRelativePath: string, args: string[] = [], timeoutMs = 30_000): Promise<string> {
+  private readonly PYTHON_BIN = process.env.PYTHON_BIN || 'python3'; 
+  runScript(scriptRelativePath: string, args: string[] = [],input?: string,  timeoutMs = 30_000): Promise<string>{
     const scriptPath = join(process.cwd(), scriptRelativePath);
     this.logger.debug(`Running python: ${this.PYTHON_BIN} ${scriptPath} ${args.join(' ')}`);
 
