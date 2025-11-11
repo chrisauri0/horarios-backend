@@ -6,8 +6,14 @@
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS
-  app.enableCors({ origin: 'http://localhost:4200' });
+  // Habilitar CORS para desarrollo (acepta peticiones desde cualquier origen)
+  // En producción, deberías especificar los orígenes permitidos
+  app.enableCors({ 
+    origin: true, // Permite cualquier origen en desarrollo
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
 
   // Prisma shutdown hooks
