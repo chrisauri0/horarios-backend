@@ -1,21 +1,20 @@
-  import { NestFactory } from '@nestjs/core';
-  import { AppModule } from './app.module';
-  import { PrismaService } from '../prisma/prisma.service';
-  import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { PrismaService } from '../prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS
-  app.enableCors({ origin: 'http://localhost:4200' });
+app.enableCors({
+  origin: true,
+  credentials: true,
+});
 
 
-  // Prisma shutdown hooks
-  const prismaService = app.get(PrismaService);
-
-  // Usar puerto de variable de entorno
+  // Puerto dinámico (importante para Render)
   const port = process.env.PORT || 3000;
+
   await app.listen(port);
-  console.log(`🚀 App running on http://localhost:${port}`);
+  console.log(`🚀 App running on port ${port}`);
 }
 bootstrap();

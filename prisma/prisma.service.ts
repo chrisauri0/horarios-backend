@@ -11,9 +11,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 
-  /**
-   * Llamar desde main.ts para cerrar correctamente Nest cuando Prisma detecte beforeExit.
-   * Uso: await prismaService.enableShutdownHooks(app)
-   */
-  
+ 
 }
