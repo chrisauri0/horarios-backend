@@ -11,16 +11,6 @@ export class UsersController {
     private authService: AuthService,
   ) {}
 
-  @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    const user = await this.authService.validateUser(body.email, body.password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    return this.authService.login(user);
-  }
-
-
   @Get()
   async getAll() {
     return this.usersService.findAll();
@@ -35,7 +25,75 @@ export class UsersController {
   async getByEmail(@Param('email') email: string) {
     return this.usersService.findByEmail(email);
   }
+@Post('login')
+async login(@Body() body: { email: string; password: string }) {
+  const user = await this.usersService.findByEmail(body.email);
 
+  if (!user) {
+    return {
+      success: false,
+      error: 'El correo no existe',
+    };
+  }
+
+  const bcrypt = await import('bcryptjs');
+  const passwordMatches = await bcrypt.compare(body.password, user.password_hash);
+
+  if (!passwordMatches) {
+    return {
+      success: false,
+      error: 'Contraseña incorrecta',
+    };
+  }
+
+  // Usuario válido, devolver datos
+  const { password_hash, ...safeUser } = user;
+  return {
+    success: true,
+    message: 'Login exitoso',
+    user: safeUser,
+  };
+}
+
+@Post('login-admin')
+async loginAdmin(@Body() body: { email: string; password: string }) {
+  const user = await this.usersService.findByEmail(body.email);
+
+  if (!user) {
+    return {
+      success: false,
+      error: 'El correo no existe',
+    };
+  }
+  if (user.role !== 'administrador') {
+    return {
+      success: false,
+      error: 'Acceso denegado: no es un usuario administrador',
+    };
+  }
+
+  
+  const bcrypt = await import('bcryptjs');
+  const passwordMatches = await bcrypt.compare(body.password, user.password_hash);
+
+  if (!passwordMatches) {
+    return {
+      success: false,
+      error: 'Contraseña incorrecta',
+    };
+  }
+
+  // Usuario válido, devolver datos
+  const { password_hash, ...safeUser } = user;
+  return {
+    success: true,
+    message: 'Login exitoso',
+    user: safeUser,
+  };
+  
+}
+
+  
   @Post('register')
   async create(@Body() body: { email: string; passwordHash: string; fullName?: string; role?: string; metadata?: object }) {
     if (!body.email.endsWith('@uteq.edu.mx')) {

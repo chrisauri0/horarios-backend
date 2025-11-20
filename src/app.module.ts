@@ -10,6 +10,8 @@ import { HorariosModule } from './horarios/horarios.module';
 import { AuthModule } from './auth/auth.module';
 import { MateriasModule } from './materias/materias.module';
 import { PythonModule } from './python/python.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { CarrerasModule } from './carreras/carreras.module';
 
 
 @Module({
@@ -35,6 +37,8 @@ PrismaModule,
 
     MateriasModule,
     PythonModule,
+    SchedulerModule,
+    CarrerasModule,
   ],
 })
 export class AppModule {}

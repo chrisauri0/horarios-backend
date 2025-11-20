@@ -11,25 +11,25 @@ export class GruposController {
   }
 
   @Get(':id')
-  async getById(@Param('id') grupo_id: string) {
-    return this.gruposService.findById(grupo_id);
+  async getById(@Param('id') id: string) {
+    return this.gruposService.findById(id);
   }
 
   @Post()
-  async create(@Body() body: { name: string; tutor_id?: string; metadata?: object }) {
+  async create(@Body() body: { nombre: string; division: string; data?: object; grado: number, carrera: string}) {
     return this.gruposService.create(body);
   }
 
   @Patch(':id')
   async update(
-    @Param('id') grupo_id: string,
-    @Body() body: Partial<{ name: string; tutor_id?: string; metadata?: object }>
+    @Param('id') id: string,
+    @Body() body: Partial<{ nombre: string; division: string; data?: object; grado: number, carrera: string }>
   ) {
-    return this.gruposService.update(grupo_id, body);
+    return this.gruposService.update(id, body);
   }
 
   @Delete(':id')
-  async delete(@Param('id') grupo_id: string) {
-    return this.gruposService.delete(grupo_id);
+  async delete(@Param('id') id: string) {
+    return this.gruposService.delete(id);
   }
 }

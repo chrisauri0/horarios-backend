@@ -7,14 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model carreras {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre     String
+  division   String
+  data       Json?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  grado      Int
+}
+
 model grupos {
-  grupo_id       String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String
-  tutor_id       String?          @db.Uuid
-  metadata       Json?            @default("{}")
-  created_at     DateTime?        @default(now()) @db.Timestamptz(6)
-  profesores     profesores?      @relation(fields: [tutor_id], references: [id], onUpdate: NoAction)
-  turores_grupos turores_grupos[]
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre     String
+  grado      Int
+  carrera    String
+  division   String
+  data       Json?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
 }
 
 model horarios {
@@ -26,7 +35,7 @@ model horarios {
 }
 
 model horarios_profes {
-  id         Int       @id @default(autoincrement())
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name       String
   data       Json
   created_at DateTime? @default(now()) @db.Timestamptz(6)
@@ -34,45 +43,37 @@ model horarios_profes {
 }
 
 model materias {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre       String
+  carrera      String
+  grado        Int
+  data         Json?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  horas_semana Int
+  salones      Json?     @default("[]")
+}
+
+model profesores {
+  profesor_id  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre       String
+  apellidos    String
+  email        String
+  can_be_tutor Boolean?  @default(false)
+  materias     Json?     @default("[]")
+  metadata     Json?     @default("{}")
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  min_hora     Int?
+}
+
+model salones {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre     String
   data       Json?
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @default(now()) @db.Timestamptz(6)
-}
-
-model profesores {
-  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre         String
-  apellidos      String
-  email          String
-  can_be_tutor   Boolean?         @default(false)
-  materias       Json?            @default("[]")
-  metadata       Json?            @default("{}")
-  created_at     DateTime?        @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime?        @default(now()) @db.Timestamptz(6)
-  grupos         grupos[]
-  turores_grupos turores_grupos[]
-}
-
-model salones {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre_salon    String
-  nombre_edificio String
-  data            Json?
-  created_at      DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
-}
-
-model turores_grupos {
-  profesor_id String     @db.Uuid
-  grupo_id    String     @db.Uuid
-  role        String?    @default("tutor")
-  assigned_at DateTime?  @default(now()) @db.Timestamptz(6)
-  grupos      grupos     @relation(fields: [grupo_id], references: [grupo_id], onDelete: Cascade, onUpdate: NoAction)
-  profesores  profesores @relation(fields: [profesor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@id([profesor_id, grupo_id])
+  division   String
 }
 
 model users {

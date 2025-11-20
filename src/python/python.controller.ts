@@ -8,10 +8,28 @@ export class PythonController {
   @Get('run')
   async runScript() {
     try {
-      const output = await this.pythonService.runScript('src/scripts/cp_sat_schedule.py');
-      const data = JSON.parse(output); // si tu script devuelve JSON
+      const data = await this.pythonService.runScript(); // <- data ya contiene el horario
       console.log('Resultado Python:', data);
-      return { success: true, data };
+
+      // 1️⃣ Agrupar por grupo
+      const grupos = data.horario.reduce((acc, entry) => {
+        const { group, ...rest } = entry;
+        if (!acc[group]) {
+          acc[group] = [];
+        }
+        acc[group].push(rest);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      // 2️⃣ Guardar una sola fila por grupo
+      for (const [nombregrupo, entries] of Object.entries(grupos)) {
+        await this.pythonService.create({
+          nombregrupo,
+          data: entries, // 👈 aquí va el array de materias
+        });
+      }
+
+      return { success: true, grupos };
     } catch (error) {
       console.error('Error ejecutando Python:', error);
       return { success: false, error: error.message };

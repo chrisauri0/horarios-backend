@@ -10,36 +10,40 @@ export class GruposService {
         return this.prisma.grupos.findMany();
     }
 
-    async findById(grupo_id: string) {
+    async findById(id: string) {
         return this.prisma.grupos.findUnique({
-            where: { grupo_id },
+            where: { id },
         });
     }
 
     async create(data: {
-        name: string;
-        tutor_id?: string;
-        metadata?: object;
+        nombre: string;
+        division: string;
+        carrera: string;
+        data?: object;
+        grado: number;
     }) {
         return this.prisma.grupos.create({
             data,
         });
     }
 
-    async update(grupo_id: string, data: Partial<{
-        name: string;
-        tutor_id?: string;
-        metadata?: object;
+    async update(id: string, data: Partial<{
+        nombre: string;
+        division: string;
+        carrera: string;
+        data?: object;
+        grado: number;
     }>) {
         return this.prisma.grupos.update({
-            where: { grupo_id },
+            where: { id },
             data,
         });
     }
 
-    async delete(grupo_id: string) {
+    async delete(id: string) {
         return this.prisma.grupos.delete({
-            where: { grupo_id },
+            where: { id },
         });
     }
 }

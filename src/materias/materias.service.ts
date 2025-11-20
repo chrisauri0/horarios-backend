@@ -13,7 +13,6 @@ export class MateriasService {
     }
     
     async getHash() {
-    // Obtiene una lista simple de materias con timestamps o ids relevantes
     const materias = await this.prisma.materias.findMany({
       select: { id: true, updated_at: true },
       orderBy: { updated_at: 'desc' },
@@ -38,7 +37,11 @@ export class MateriasService {
   }
     async create(data: {
         nombre: string;
+        carrera: string;
         data?: object;
+        horas_semana: number;
+        grado: number;
+        salones?: object;
     }) {
         return this.prisma.materias.create({    
             data,
@@ -47,7 +50,10 @@ export class MateriasService {
 
     async update(id: string, data: Partial<{
         nombre: string;
+        carrera: string;
         data?: object;
+        grado: number;
+        horas_semana: number;
     }>) {
         return this.prisma.materias.update({
             where: { id },

@@ -20,7 +20,7 @@ export class ProfesoresService {
     async findById(id: string) {
         console.log('→ Ejecutando findById con id:', id);
         return this.prisma.profesores.findUnique({
-            where: { id },
+            where: { profesor_id: id },
         });
     }
 
@@ -32,6 +32,7 @@ export class ProfesoresService {
         can_be_tutor?: boolean;
         materias?: object;
         metadata?: object;
+        min_hora: number;
     }) {
         return this.prisma.profesores.create({
             data,
@@ -45,16 +46,17 @@ export class ProfesoresService {
         can_be_tutor?: boolean;
         materias?: object;
         metadata?: object;
+        min_hora: number;
     }>) {
         return this.prisma.profesores.update({
-            where: { id },
+            where: { profesor_id: id },
             data,
         });
     }
 
     async delete(id: string) {
         return this.prisma.profesores.delete({
-            where: { id },
+            where: { profesor_id: id },
         });
     }
 }

@@ -1,45 +1,37 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { spawn } from 'child_process';
-import { join } from 'path';
+import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
 export class PythonService {
-  private readonly logger = new Logger(PythonService.name);
-  private readonly PYTHON_BIN = process.env.PYTHON_BIN || 'python3'; 
-  runScript(scriptRelativePath: string, args: string[] = [],input?: string,  timeoutMs = 30_000): Promise<string>{
-    const scriptPath = join(process.cwd(), scriptRelativePath);
-    this.logger.debug(`Running python: ${this.PYTHON_BIN} ${scriptPath} ${args.join(' ')}`);
+  private readonly pythonUrl = 'http://localhost:5000';
 
-    return new Promise((resolve, reject) => {
-      const child = spawn(this.PYTHON_BIN, [scriptPath, ...args], { stdio: ['pipe', 'pipe', 'pipe'] });
+  constructor(private readonly httpService: HttpService, private readonly prismaService: PrismaService) {}
 
-      let stdout = '';
-      let stderr = '';
+  async runScript() {
+    try {
+    const response = await firstValueFrom(
+  this.httpService.post(
+    `${this.pythonUrl}/generar-horario`,
+    {}, // enviar un body vacío JSON
+    { headers: { 'Content-Type': 'application/json' } }
+  )
+);
 
-      const timeout = setTimeout(() => {
-        child.kill('SIGKILL');
-        reject(new Error(`Python script timeout (${timeoutMs}ms)`));
-      }, timeoutMs);
 
-      child.stdout.on('data', (data) => { stdout += data.toString(); });
-      child.stderr.on('data', (data) => { stderr += data.toString(); });
-
-      child.on('error', (err) => {
-        clearTimeout(timeout);
-        this.logger.error('Failed to spawn python process', err);
-        reject(err);
-      });
-
-      child.on('close', (code) => {
-        clearTimeout(timeout);
-        if (code === 0) {
-          resolve(stdout.trim());
-        } else {
-          const e = new Error(`Python exited with code ${code}: ${stderr}`);
-          this.logger.error(e.message);
-          reject(e);
-        }
-      });
-    });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Error al ejecutar script Python: ${error.message}`);
+    }
   }
+
+  async create(data: { nombregrupo: string; data: any }) {
+  return this.prismaService.horarios.create({
+    data: {
+      nombregrupo: data.nombregrupo,
+      data: data.data, // 👈 este campo coincide con tu modelo
+    },
+  });
+}
 }
