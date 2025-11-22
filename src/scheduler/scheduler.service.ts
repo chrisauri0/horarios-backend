@@ -20,7 +20,7 @@ export class SchedulerService {
 
     // 1️⃣ Llamar al microservicio Python
 const response = await this.httpService.axiosRef.post(
-  'http://localhost:5000/generar-horario',
+  'https://python-back-horari-uteq.onrender.com/generar-horario',
 );
 
 console.log('🧠 Respuesta Python:', response.data);
