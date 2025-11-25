@@ -11,6 +11,6 @@ export class RolesGuard implements CanActivate {
     if (!token) return false;
     const payload = this.jwtService.decode(token) as any;
     // Verifica rol o metadata
-    return payload.role === 'admin' || payload.metadata?.admin === true;
+    return payload.role === 'adminadministrador' || payload.metadata?.admin === true;
   }
 }
