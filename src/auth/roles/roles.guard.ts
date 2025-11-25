@@ -1,16 +1,26 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+    console.log('🔐 Roles requeridos:', requiredRoles);
+
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
-    if (!token) return false;
-    const payload = this.jwtService.decode(token) as any;
-    // Verifica rol o metadata
-    return payload.role === 'administrador' || payload.metadata?.admin === true;
+    const user = request.user;
+    console.log('👤 Usuario en request.user:', user);
+
+    if (!user) {
+      console.log('❌ No hay usuario en request.user, acceso denegado');
+      return false;
+    }
+
+    const allowed = requiredRoles.includes(user.role);
+    console.log('⚡ Acceso permitido:', allowed);
+    return allowed;
   }
 }
+
