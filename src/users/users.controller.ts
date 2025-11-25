@@ -72,7 +72,6 @@ async loginAdmin(@Body() body: { email: string; password: string }) {
     };
   }
 
-  
   const bcrypt = await import('bcryptjs');
   const passwordMatches = await bcrypt.compare(body.password, user.password_hash);
 
@@ -83,14 +82,8 @@ async loginAdmin(@Body() body: { email: string; password: string }) {
     };
   }
 
-  // Usuario válido, devolver datos
-  const { password_hash, ...safeUser } = user;
-  return {
-    success: true,
-    message: 'Login exitoso',
-    user: safeUser,
-  };
-  
+  // Generar y devolver JWT usando authService.login
+  return this.authService.login(user);
 }
 
   

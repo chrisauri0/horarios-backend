@@ -1,7 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { SalonesService } from './salones.service';
+import { AuthGuard } from '@nestjs/passport';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../auth/roles/roles.guard';
+
 
 @Controller('salones')
+
+@UseGuards(AuthGuard('jwt'), RolesGuard)  // 🔒 Protege TODO el controlador
 export class SalonesController {
   constructor(private readonly salonesService: SalonesService) {}
 
