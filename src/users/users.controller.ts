@@ -105,7 +105,7 @@ async loginAdmin(@Body() body: { email: string; password: string }) {
         ...body,
         passwordHash: hashedPassword,
       });
-      return this.authService.login(user);
+      
     } catch (err) {
       // Prisma error de restricción única
       if (err.code === 'P2002') {
