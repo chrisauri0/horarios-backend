@@ -15,4 +15,9 @@ export class SchedulerController {
     const schedules = await this.schedulerService.getAllSchedules();
     return { schedules }; 
   }
+  @Get('subjectsschedules')
+  async getSubjectsSchedules() {
+    const subjectsSchedules = await this.schedulerService.getSubjectsFormatted();
+    return  subjectsSchedules ;
+  }
 }
