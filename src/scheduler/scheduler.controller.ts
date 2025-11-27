@@ -6,7 +6,7 @@ export class SchedulerController {
   constructor(private readonly schedulerService: SchedulerService) {}
 
   @Post('generate')
-  async generateSchedule(@Body() body: any) {
+  async generateSchedule() {
     const result = await this.schedulerService.generateSchedule();
     return { result };
   } 

@@ -13,9 +13,21 @@ export class ProfesoresService {
         });
     }
 
-    async findAll() {
+        async findAll() {
         return this.prisma.profesores.findMany();
     }
+
+async findAllMovil() {
+  return this.prisma.profesores.findMany({
+    select: {
+        nombre: true,
+        apellidos: true,
+        email: true
+      // agrega los campos que quieras devolver
+    }
+  });
+}
+
 
     async findById(id: string) {
         console.log('→ Ejecutando findById con id:', id);

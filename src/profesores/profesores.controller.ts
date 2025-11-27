@@ -3,6 +3,7 @@ import { ProfesoresService } from './profesores.service';
 import { Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../auth/roles/roles.guard';
+import { get } from 'http';
 
 
   
@@ -14,6 +15,11 @@ export class ProfesoresController {
   @Get()
   async getAll() {
     return this.profesoresService.findAll();
+  }
+  
+  @Get('/movil')
+  async getAllMovil() {
+    return this.profesoresService.findAllMovil();
   }
   
   @Get('/tutores')
