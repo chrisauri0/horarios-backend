@@ -13,38 +13,52 @@ export class SchedulerService {
 
 
 
-
 async getSubjectsFormatted() {
+  // 1️⃣ Obtener materias + profesores
   const materiasProfesores = await this.prisma.$queryRaw<
-    Array<{ id: string; h: number; rooms: string[] | string; profs: string; min_hora?: number | null }>
-  >`SELECT  
-        m.nombre as id,
-        m.horas_semana as h,
-        m.salones as rooms,
+    Array<{ 
+      id: string; 
+      h: number; 
+      rooms: string[] | string; 
+      profs: string; 
+      min_hora?: number | null;
+    }>
+  >`
+    SELECT  
+        m.nombre AS id,
+        m.horas_semana AS h,
+        m.salones AS rooms,
         CONCAT(p.nombre, ' ', p.apellidos) AS profs,
-        p.min_hora 
+        p.min_hora
     FROM profesores p
-    JOIN materias m ON p.materias @> to_jsonb(m.nombre)::jsonb;`;
+    JOIN materias m 
+        ON p.materias @> to_jsonb(m.nombre)::jsonb;
+  `;
 
-  const grupos = await this.prisma.$queryRaw<Array<{ nombre: string }>>`SELECT g.nombre FROM grupos g;`;
+  // 2️⃣ Obtener grupos existentes
+  const grupos = await this.prisma.$queryRaw<Array<{ nombre: string }>>`
+    SELECT nombre FROM grupos;
+  `;
 
-  // 1️⃣ Agrupar materias -> lista de profesores
+  // 3️⃣ Agrupar materias → lista de profesores por materia
   const materiasMap = new Map<string, string[]>();
+
   for (const item of materiasProfesores) {
     const matName = item.id.trim();
     if (!materiasMap.has(matName)) materiasMap.set(matName, []);
     materiasMap.get(matName)!.push(item.profs);
   }
 
-  // 2️⃣ Crear JSON final
+  // 4️⃣ Construir JSON final por grupo
   const result: Record<string, any[]> = {};
 
   grupos.forEach((g, groupIdx) => {
-    const cleanName = g.nombre.replace(/\s+/g, "");
+    const cleanName = g.nombre.replace(/\s+/g, ""); // IDGS15 → IDGS15
     result[cleanName] = [];
 
-    materiasMap.forEach((profesList, matName) => {
-      const assignedProf = profesList[groupIdx % profesList.length]; // rotación si hay menos profes que grupos
+    materiasMap.forEach((profsList, matName) => {
+      const assignedProf = profsList[groupIdx % profsList.length]; // rotación
+
       const matData = materiasProfesores.find(m => m.id.trim() === matName)!;
 
       result[cleanName].push({
@@ -61,10 +75,6 @@ async getSubjectsFormatted() {
   return result;
 }
 
-
-
-
-
   async generateSchedule() {  
 const subjects = await this.getSubjectsFormatted();
 
@@ -80,7 +90,7 @@ const response = await this.httpService.axiosRef.post(
 
 console.log('🧠 Respuesta Python:', response.data);
 
-const result = response.data; // 👈 cambia esto
+const result = response.data; 
   
     if (!result || !Array.isArray(result.horario)) {
   throw new Error('No se recibieron asignaciones válidas del microservicio');
