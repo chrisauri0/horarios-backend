@@ -76,17 +76,13 @@ async getSubjectsFormatted() {
 }
 
   async generateSchedule() {  
-// const subjects = await this.getSubjectsFormatted();
-
-// console.log("📦 JSON enviado a Python:", JSON.stringify(subjects, null, 2));
 
   
 
     // 1️⃣ Llamar al microservicio Python
 const response = await this.httpService.axiosRef.post(
   'https://python-back-horari-uteq.onrender.com/generar-horario',
-  // 'http://localhost:5000/generar-horario',
-  //  subjects 
+  
 );
 
 console.log('🧠 Respuesta Python:', response.data);
