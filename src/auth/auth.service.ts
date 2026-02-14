@@ -1,39 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private usersService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
- async login(user: any) {
-  const payload = { email: user.email, sub: user.id, role: user.role, metadata: user.metadata };
-  return {
-  success: true,
-  user: {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    metadata: user.metadata
-  },
-  access_token: this.jwtService.sign(payload),
-}
-}
+  async login(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
 
-async validateUser(email: string, password: string): Promise<any> {
-  const user = await this.usersService.findByEmail(email);
-  if (user && await this.comparePassword(password, user.password_hash)) {
-    const { password_hash, ...result } = user; // quitar password
-    return result;
-  }
-  return null;
-}
+    if (!user ) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
 
-  async comparePassword(plain: string, hash: string): Promise<boolean> {
-    const bcrypt = await import('bcryptjs');
-    return bcrypt.compare(plain, hash);
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.password_hash,
+    );
+
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const payload = {
+      sub: user.id,
+      areaId: user.area_id,
+      nombre: user.full_name,
+    };
+
+    return {
+      token: this.jwtService.sign(payload),
+      user: {
+        nombre: user.full_name,
+        areaId: user.area_id,
+      },
+    };
   }
 }

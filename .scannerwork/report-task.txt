@@ -1,0 +1,6 @@
+projectKey=backend-horari-uteq
+serverUrl=http://localhost:9000
+serverVersion=26.1.0.118079
+dashboardUrl=http://localhost:9000/dashboard?id=backend-horari-uteq
+ceTaskId=bf2125c4-93cc-41cf-ac3e-5ce5388a5ab6
+ceTaskUrl=http://localhost:9000/api/ce/task?id=bf2125c4-93cc-41cf-ac3e-5ce5388a5ab6

@@ -10,6 +10,7 @@ export class UsersController {
     private usersService: UsersService,
     private authService: AuthService,
   ) {}
+  
 
   @Get()
   async getAll() {
@@ -83,7 +84,7 @@ async loginAdmin(@Body() body: { email: string; password: string }) {
   }
 
   // Generar y devolver JWT usando authService.login
-  return this.authService.login(user);
+  return this.authService.login(user.email, body.password);
 }
 
   

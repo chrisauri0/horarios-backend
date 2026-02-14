@@ -1,27 +1,22 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersService } from '../users/users.service';
-import { RolesGuard } from './roles/roles.guard';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { UsersModule } from 'src/users/users.module';
+import { JwtStrategy } from './jwt.strategy';
+import { UsersModule } from '../users/users.module';
+
 @Module({
   imports: [
-
-    ConfigModule,  // 👈 NECESARIO
-    JwtModule.registerAsync({
-      imports: [ConfigModule], // 👈 también importante
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
-      }),
+    forwardRef(() => UsersModule),
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '4h' },
     }),
   ],
-  providers: [AuthService, UsersService, JwtStrategy, RolesGuard],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule, JwtStrategy, RolesGuard],
+  exports: [AuthService],
 })
 export class AuthModule {}

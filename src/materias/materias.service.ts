@@ -11,6 +11,12 @@ export class MateriasService {
     async findAll() {
         return this.prisma.materias.findMany();
     }
+
+    async findByArea(areaId: number) {
+    return this.prisma.materias.findMany({
+      where: { area_id: areaId },
+    });
+  }
     
     async getHash() {
     const materias = await this.prisma.materias.findMany({

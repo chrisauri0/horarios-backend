@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+
 }
 
 datasource db {
@@ -14,6 +15,8 @@ model carreras {
   data       Json?
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   grado      Int
+  area_id    Int?
+  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model grupos {
@@ -24,6 +27,8 @@ model grupos {
   division   String
   data       Json?
   created_at DateTime? @default(now()) @db.Timestamptz(6)
+  area_id    Int?
+  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model horarios {
@@ -32,6 +37,8 @@ model horarios {
   data        Json
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  area_id     Int?
+  areas       areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model horarios_profes {
@@ -52,6 +59,8 @@ model materias {
   updated_at   DateTime? @default(now()) @db.Timestamptz(6)
   horas_semana Int
   salones      Json?     @default("[]")
+  area_id      Int?
+  areas        areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model profesores {
@@ -65,6 +74,8 @@ model profesores {
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   updated_at   DateTime? @default(now()) @db.Timestamptz(6)
   min_hora     Int?
+  area_id      Int?
+  areas        areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model salones {
@@ -74,6 +85,8 @@ model salones {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @default(now()) @db.Timestamptz(6)
   division   String
+  area_id    Int?
+  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
@@ -85,4 +98,80 @@ model users {
   created_at    DateTime? @default(now()) @db.Timestamptz(6)
   updated_at    DateTime? @default(now()) @db.Timestamptz(6)
   metadata      Json?     @default("{}")
+  area_id       Int?
+  activo        Boolean?  @default(true)
+  areas         areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model posts {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titulo        String
+  descripcion   String
+  imagen_url    String?
+  
+  creator_id    String   @db.Uuid
+  creator       users    @relation(fields: [creator_id], references: [id])
+
+  score         Int      @default(0)
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  comment_count Int      @default(0)
+  view_count    Int      @default(0)
+
+  status        String   @default("active") // active | expired | hidden
+  expires_at    DateTime? @db.Timestamptz(6)
+
+  deleted       Boolean  @default(false)
+
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  reactions     post_reactions[]
+  comments      post_comments[]
+
+
+  @@index([created_at])
+  @@index([expires_at])
+  @@index([score, created_at])
+}
+
+model post_comments {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id   String   @db.Uuid
+  post      posts    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  user_id   String   @db.Uuid
+  user      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  content   String
+  score     Int      @default(0)
+
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model post_reactions {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id   String   @db.Uuid
+  post      posts    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  user_id   String   @db.Uuid
+  user      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  tipo      String   // "up" | "down"
+
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([post_id, user_id])
+}
+
+model areas {
+  id         Int          @id @default(autoincrement())
+  nombre     String       @unique
+  carreras   carreras[]
+  grupos     grupos[]
+  horarios   horarios[]
+  materias   materias[]
+  profesores profesores[]
+  salones    salones[]
+  users      users[]
 }

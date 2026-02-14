@@ -1,15 +1,23 @@
 import { MateriasService } from './materias.service';
 import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Req } from '@nestjs/common';
 
+
+@UseGuards(AuthGuard('jwt'))
 
 @Controller('materias')
 export class MateriasController {
   constructor(private readonly materiasService: MateriasService) {}
 
   @Get()
-  async getAll() {
-    return this.materiasService.findAll();
+  async getAll(@Req() req) {
+    // return this.materiasService.findAll();
+     const areaId = req.user.areaId; // 🔥
+  return this.materiasService.findByArea(areaId);
   }
+   
   @Get('hash')
   async getHash() {
     return this.materiasService.getHash();

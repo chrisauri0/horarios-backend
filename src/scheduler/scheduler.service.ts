@@ -35,12 +35,11 @@ async getSubjectsFormatted() {
         ON p.materias @> to_jsonb(m.nombre)::jsonb;
   `;
 
-  // 2️⃣ Obtener grupos existentes
+
   const grupos = await this.prisma.$queryRaw<Array<{ nombre: string }>>`
     SELECT nombre FROM grupos;
   `;
 
-  // 3️⃣ Agrupar materias → lista de profesores por materia
   const materiasMap = new Map<string, string[]>();
 
   for (const item of materiasProfesores) {
@@ -49,7 +48,6 @@ async getSubjectsFormatted() {
     materiasMap.get(matName)!.push(item.profs);
   }
 
-  // 4️⃣ Construir JSON final por grupo
   const result: Record<string, any[]> = {};
 
   grupos.forEach((g, groupIdx) => {
