@@ -45,6 +45,7 @@ async findAllMovil() {
         materias?: object;
         metadata?: object;
         min_hora: number;
+        disponibilidad?: object;
     }) {
         return this.prisma.profesores.create({
             data,
@@ -59,6 +60,8 @@ async findAllMovil() {
         materias?: object;
         metadata?: object;
         min_hora: number;
+        disponibilidad?: object;
+
     }>) {
         return this.prisma.profesores.update({
             where: { profesor_id: id },

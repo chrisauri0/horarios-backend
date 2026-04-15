@@ -63,18 +63,18 @@ model materias {
 }
 
 model profesores {
-  profesor_id  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre       String
-  apellidos    String
-  email        String
-  can_be_tutor Boolean?  @default(false)
-  materias     Json?     @default("[]")
-  metadata     Json?     @default("{}")
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
-  min_hora     Int?
-  area_id      Int?
-  areas        areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profesor_id    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  apellidos      String
+  email          String
+  can_be_tutor   Boolean?  @default(false)
+  materias       Json?     @default("[]")
+  metadata       Json?     @default("{}")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  area_id        Int?
+  disponibilidad Json?
+  areas          areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model salones {
@@ -165,7 +165,7 @@ model areas {
   users      users[]
 }
 
-model psicologos{
+model psicologos {
   psicologo_id   String    @id(map: "psicologo_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre         String
   apellidos      String

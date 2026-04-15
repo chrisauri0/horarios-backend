@@ -30,6 +30,7 @@ export class AuthService {
       sub: user.id,
       areaId: user.area_id,
       nombre: user.full_name,
+      metadata: user.metadata,
     };
 
     return {
@@ -37,6 +38,7 @@ export class AuthService {
       user: {
         nombre: user.full_name,
         areaId: user.area_id,
+        metadata: user.metadata,
       },
     };
   }

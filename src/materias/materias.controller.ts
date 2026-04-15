@@ -5,17 +5,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { Req } from '@nestjs/common';
 
 
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 
 @Controller('materias')
 export class MateriasController {
   constructor(private readonly materiasService: MateriasService) {}
 
+  // return this.materiasService.findAll();
   @Get()
   async getAll(@Req() req) {
-    // return this.materiasService.findAll();
-     const areaId = req.user.areaId; // 🔥
-  return this.materiasService.findByArea(areaId);
+  return this.materiasService.findAll();
   }
    
   @Get('hash')

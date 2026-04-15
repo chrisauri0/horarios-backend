@@ -1,7 +1,26 @@
 // horario.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { HttpService } from '@nestjs/axios';
+import { Prisma } from '@prisma/client';
+
+type GenerateSchedulePayload = {
+  grupos: unknown[];
+  profesores: unknown[];
+  salones: unknown[];
+  division: string;
+  turno: string;
+};
+
+type ScheduleEntry = {
+  grupo?: string;
+  group?: string;
+  [key: string]: unknown;
+};
+
+type SaveSchedulesPayload = {
+  horario: ScheduleEntry[];
+};
 
 @Injectable()
 export class SchedulerService {
@@ -9,6 +28,57 @@ export class SchedulerService {
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
   ) {}
+
+  private async persistSchedulesByGroup(horario: ScheduleEntry[]) {
+    const gruposMap = new Map<string, ScheduleEntry[]>();
+
+    for (const [idx, item] of horario.entries()) {
+      const rawGroup = typeof item.grupo === 'string' ? item.grupo : item.group;
+
+      if (!rawGroup || typeof rawGroup !== 'string') {
+        throw new BadRequestException(
+          `La entrada en horario[${idx}] no contiene un grupo valido (grupo o group)`,
+        );
+      }
+
+      const groupName = rawGroup.trim();
+      if (!groupName) {
+        throw new BadRequestException(
+          `La entrada en horario[${idx}] contiene un grupo vacio`,
+        );
+      }
+
+      if (!gruposMap.has(groupName)) {
+        gruposMap.set(groupName, []);
+      }
+      gruposMap.get(groupName)!.push(item);
+    }
+
+    for (const [groupName, assignments] of gruposMap.entries()) {
+      const existing = await this.prisma.horarios.findFirst({
+        where: { nombregrupo: groupName },
+      });
+
+      if (existing) {
+        await this.prisma.horarios.update({
+          where: { id: existing.id },
+          data: { data: assignments as Prisma.InputJsonValue },
+        });
+      } else {
+        await this.prisma.horarios.create({
+          data: {
+            nombregrupo: groupName,
+            data: assignments as Prisma.InputJsonValue,
+          },
+        });
+      }
+    }
+
+    return {
+      grupos: Array.from(gruposMap.keys()),
+      totalAsignaciones: horario.length,
+    };
+  }
 
 
 
@@ -73,14 +143,15 @@ async getSubjectsFormatted() {
   return result;
 }
 
-  async generateSchedule() {  
+  async generateSchedule(payload: GenerateSchedulePayload) {  
 
   
 
     // 1️⃣ Llamar al microservicio Python
 const response = await this.httpService.axiosRef.post(
-  'https://python-back-horari-uteq.onrender.com/generar-horario',
-  
+  // 'https://python-back-horari-uteq.onrender.com/generar-horario',
+  'http://localhost:8000/generar-horario',
+  payload,
 );
 
 console.log('🧠 Respuesta Python:', response.data);
@@ -91,41 +162,36 @@ const result = response.data;
   throw new Error('No se recibieron asignaciones válidas del microservicio');
 }
 
-    // 3️⃣ Agrupar por grupo
-    const gruposMap = new Map<string, any[]>();
-
-    for (const item of result.horario) {
-      const groupId = item.group;
-      if (!gruposMap.has(groupId)) {
-        gruposMap.set(groupId, []);
-      }
-      gruposMap.get(groupId)!.push(item);
-    }
-
-   // 4️⃣ Guardar cada grupo en la tabla `horarios`
-for (const [groupName, assignments] of gruposMap.entries()) {
-  const existing = await this.prisma.horarios.findFirst({
-  where: { nombregrupo: groupName },
-});
-
-if (existing) {
-  await this.prisma.horarios.update({
-    where: { id: existing.id },
-    data: { data: assignments },
-  });
-} else {
-  await this.prisma.horarios.create({
-    data: { nombregrupo: groupName, data: assignments },
-  });
-}
-
-}
+    const persisted = await this.persistSchedulesByGroup(result.horario);
 
 
     // 5️⃣ Devolver una respuesta general
     return {
       message: 'Horarios generados y guardados por grupo correctamente',
-      grupos: Array.from(gruposMap.keys()),
+      grupos: persisted.grupos,
+      totalAsignaciones: persisted.totalAsignaciones,
+    };
+  }
+
+  async saveSchedules(payload: SaveSchedulesPayload | ScheduleEntry[]) {
+    const horario = Array.isArray(payload)
+      ? payload
+      : payload && Array.isArray(payload.horario)
+        ? payload.horario
+        : null;
+
+    if (!horario) {
+      throw new BadRequestException(
+        'El payload debe ser un arreglo o tener la propiedad horario como arreglo',
+      );
+    }
+
+    const persisted = await this.persistSchedulesByGroup(horario);
+
+    return {
+      message: 'Horarios guardados correctamente',
+      grupos: persisted.grupos,
+      totalAsignaciones: persisted.totalAsignaciones,
     };
   }
 
@@ -134,4 +200,10 @@ if (existing) {
     return this.prisma.horarios.findMany();
   }
 
+  async updateSchedule(id: string, data: { nombregrupo?: string; data?: object }) {
+    return this.prisma.horarios.update({
+      where: { id },
+      data,
+    });
+  }
 }

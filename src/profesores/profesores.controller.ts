@@ -42,6 +42,7 @@ export class ProfesoresController {
     materias?: object;
     metadata?: object;
     min_hora: number;
+    disponibilidad?: object;
   }) {
     return this.profesoresService.create(body);
   }
@@ -57,6 +58,7 @@ export class ProfesoresController {
       materias?: object;
       metadata?: object;
       min_hora: number;
+      disponibilidad?: object;
     }>
   ) {
     return this.profesoresService.update(profesor_id, body);
