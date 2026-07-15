@@ -16,6 +16,10 @@ import { PostsController } from './posts/posts.controller';
 import { PostsModule } from './posts/posts.module';
 import { PsicologosModule } from './psicologos/psicologos.module';
 import { IntegracionModule } from './integracion/integracion.module';
+import { TdisModule } from './tdis/tdis.module';
+import { SolicitudesModule } from './solicitudes/solicitudes.module';
+import { AlumnosModule } from './alumnos/alumnos.module';
+import { JustificantesModule } from './justificantes/justificantes.module';
 
 
 @Module({
@@ -46,6 +50,10 @@ PrismaModule,
     PostsModule,
     PsicologosModule,
     IntegracionModule,
+    TdisModule,
+    SolicitudesModule,
+    AlumnosModule,
+    JustificantesModule,
   ],
   
 })

@@ -37,6 +37,8 @@
     "@prisma/adapter-neon": "^6.17.1",
     "@prisma/client": "^6.17.1",
     "bcryptjs": "^3.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.16.3",

@@ -89,20 +89,23 @@ model salones {
 }
 
 model users {
-  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String           @unique
+  id            String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String                 @unique
   password_hash String
   full_name     String?
-  role          String?          @default("user")
-  created_at    DateTime?        @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime?        @default(now()) @db.Timestamptz(6)
-  metadata      Json?            @default("{}")
+  role          String?                @default("user")
+  created_at    DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?              @default(now()) @db.Timestamptz(6)
+  metadata      Json?                  @default("{}")
   area_id       Int?
-  activo        Boolean?         @default(true)
+  activo        Boolean?               @default(true)
   comments      post_comments[]
   reactions     post_reactions[]
+  inscripciones_tdis inscripciones_tdi[]
   posts         posts[]
-  areas         areas?           @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  inscripciones inscripciones_taller[]
+  justificantes Justificante[]
+  areas         areas?                 @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model posts {
@@ -163,16 +166,133 @@ model areas {
   profesores profesores[]
   salones    salones[]
   users      users[]
+  psicologos psicologos[]
 }
 
 model psicologos {
-  psicologo_id   String    @id(map: "psicologo_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre         String
-  apellidos      String
-  email          String
+  psicologo_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  nombre    String
+  apellidos String
+  email     String
+
+  area_id Int?
+  areas   areas? @relation(fields: [area_id], references: [id])
+
   disponibilidad Json
   metadata       Json?     @default("{}")
   created_at     DateTime? @default(now()) @db.Timestamptz(6)
   updated_at     DateTime? @default(now()) @db.Timestamptz(6)
-  area_id        Int?
+}
+
+model talleres {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String
+  descripcion String?
+
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  inscripciones inscripciones_taller[]
+}
+
+model inscripciones_taller {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  taller_id String @db.Uuid
+  alumno_id String @db.Uuid
+
+  taller talleres @relation(fields: [taller_id], references: [id])
+  alumno users    @relation(fields: [alumno_id], references: [id])
+
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([taller_id, alumno_id])
+}
+
+
+model tdis {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eje               String
+  nombre            String
+  persona_encargada String
+  puesto            String
+  telefono          String
+  extension         String?
+  correo            String
+  tipo              String
+  horas_requeridas  Int
+  nivel_de_impacto  String
+  tdis_por_ganar    Int
+  activo            Boolean  @default(true)
+  competencias      String
+  evidencias        String
+  inscripciones inscripciones_tdi[]
+  observaciones     String
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model solicitudes_validacion {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matricula          String
+  nombre_solicitud   String
+  correo_alumno      String
+  eje                String
+  persona_encargada  String
+  puesto             String
+  telefono           String
+  extension          String?
+  correo             String
+  tipo               String
+  horas_requeridas   Int
+  nivel_de_impacto   String
+  tdis_por_ganar     Int
+  competencias       String
+  evidencias         String
+  observaciones      String
+  estado             String   @default("Pendiente")
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+}
+
+
+model inscripciones_tdi {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tdi_id         String    @db.Uuid
+  alumno_id      String    @db.Uuid
+
+  estado         String    @default("inscrito") // inscrito | en_proceso | finalizado | rechazado
+  evidencia_url  String?   // link a Drive, igual que justificantes
+  comentario_admin String?
+
+  fecha_inscripcion DateTime  @default(now()) @db.Timestamptz(6)
+  fecha_finalizacion DateTime? @db.Timestamptz(6)
+
+  tdi     tdis   @relation(fields: [tdi_id], references: [id])
+  alumno  users  @relation(fields: [alumno_id], references: [id])
+
+  @@unique([tdi_id, alumno_id])
+}
+
+
+model Justificante {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId        String   @db.Uuid
+  motivo           String
+  fecha            DateTime
+  driveUrl         String
+  estado           EstadoJustificante @default(pendiente)
+  comentarioAdmin  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  usuario          users    @relation(fields: [usuarioId], references: [id])
+
+  @@map("justificantes")
+}
+
+enum EstadoJustificante {
+  pendiente
+  aceptado
+  rechazado
 }
