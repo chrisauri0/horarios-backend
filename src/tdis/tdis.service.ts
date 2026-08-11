@@ -28,23 +28,34 @@ export class TdisService {
     };
   }
 
-  findAll() {
-    return this.prisma.tdis.findMany({ orderBy: { created_at: "desc" } });
+  findAll(organizacionId: string) {
+    return this.prisma.tdis.findMany({
+      where: { organizacionId }, // 👈 filtra por organización
+      orderBy: { created_at: "desc" },
+    });
   }
 
-  async create(dto: CreateTdiDto) {
-    const existe = await this.prisma.tdis.findFirst({ where: { eje: dto.eje } });
+  async create(dto: CreateTdiDto, organizacionId: string) {
+    const existe = await this.prisma.tdis.findFirst({
+      where: { eje: dto.eje, organizacionId }, // 👈 el eje único debe ser único POR organización, no global
+    });
     if (existe) throw new ConflictException("Ya existe un registro con ese eje");
-    return this.prisma.tdis.create({ data: this.toDb(dto) });
+
+    return this.prisma.tdis.create({
+      data: { ...this.toDb(dto), organizacionId }, // 👈 aquí estaba el bug, ya va dentro de data
+    });
   }
 
-  async update(id: string, dto: CreateTdiDto) {
-    const tdi = await this.prisma.tdis.findUnique({ where: { id } });
+  async update(id: string, dto: CreateTdiDto, organizacionId: string) {
+    const tdi = await this.prisma.tdis.findFirst({
+      where: { id, organizacionId }, // 👈 evita que edites un TDI de otra organización aunque adivines el id
+    });
     if (!tdi) throw new NotFoundException("TDI no encontrado");
     return this.prisma.tdis.update({ where: { id }, data: this.toDb(dto) });
   }
 
-  remove(id: string) {
-    return this.prisma.tdis.delete({ where: { id } });
+  remove(id: string, organizacionId: string) {
+    // 👇 mismo cuidado: valida que pertenezca a la organización antes de borrar
+    return this.prisma.tdis.deleteMany({ where: { id, organizacionId } });
   }
 }

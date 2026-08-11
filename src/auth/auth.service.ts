@@ -10,36 +10,62 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
+ // auth.service.ts
+async login(email: string, password: string) {
+  const user = await this.usersService.findByEmail(email);
 
-    if (!user ) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
+  if (!user) {
+    throw new UnauthorizedException('Usuario no encontrado');
+  }
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.password_hash,
-    );
+  if (!user.password_hash) {
+    throw new UnauthorizedException('Esta cuenta no tiene contraseña configurada (usa Google)');
+  }
 
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
+  const bcrypt = await import('bcryptjs');
+  const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
+  if (!passwordMatches) {
+    throw new UnauthorizedException('Contraseña incorrecta');
+  }
+
+  const userOrganizacion = await this.usersService.findByOrganizacionId(user.organizacionId!);
+
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    organizacionId: user.organizacionId,
+    nombre: user.full_name,
+    role: user.role, 
+  };
+
+  return {
+    access_token: this.jwtService.sign(payload),
+    user: {
+      nombreOrganizacion: userOrganizacion?.nombre || null,
+
+      full_name: user.full_name,
+      
+    },
+  };
+}
+
+
+   async generarTokenParaUsuario(user: {
+    id: string;
+    email: string;
+    organizacionId: string | null;
+    full_name: string | null;
+  }) {
     const payload = {
       sub: user.id,
-      areaId: user.area_id,
+      email: user.email,
+      organizacionId: user.organizacionId,
       nombre: user.full_name,
-      metadata: user.metadata,
     };
 
     return {
-      token: this.jwtService.sign(payload),
-      user: {
-        nombre: user.full_name,
-        areaId: user.area_id,
-        metadata: user.metadata,
-      },
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

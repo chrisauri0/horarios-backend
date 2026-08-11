@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { PythonService } from './python.service';
 
 @Controller('python')
@@ -6,9 +7,11 @@ export class PythonController {
   constructor(private readonly pythonService: PythonService) {}
 
   @Get('run')
-  async runScript() {
+  @UseGuards(AuthGuard('jwt')) // 👈 necesario para que req.user exista
+  async runScript(@Req() req: any) { // 👈 faltaba declarar req aquí
     try {
-      const data = await this.pythonService.runScript(); // <- data ya contiene el horario
+      const organizacionId = req.user.organizacionId;
+      const data = await this.pythonService.runScript();
       console.log('Resultado Python:', data);
 
       // 1️⃣ Agrupar por grupo
@@ -23,16 +26,20 @@ export class PythonController {
 
       // 2️⃣ Guardar una sola fila por grupo
       for (const [nombregrupo, entries] of Object.entries(grupos)) {
-        await this.pythonService.create({
-          nombregrupo,
-          data: entries, // 👈 aquí va el array de materias
-        });
+        await this.pythonService.create(
+          {
+            nombregrupo,
+            data: entries,
+          },
+          organizacionId, // 👈 ahora sí está definido
+        );
       }
 
       return { success: true, grupos };
     } catch (error) {
-      console.error('Error ejecutando Python:', error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Error ejecutando Python:', message);
+      return { success: false, error: message };
     }
   }
 }

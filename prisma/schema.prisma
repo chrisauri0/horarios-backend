@@ -7,127 +7,170 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Organizacion {
+  id         String   @id @default(uuid())
+  nombre     String   @unique
+  createdAt  DateTime @default(now())
+
+  carreras                carreras[]
+  grupos                  grupos[]
+  horarios                horarios[]
+  horarios_profes         horarios_profes[]
+  materias                materias[]
+  profesores              profesores[]
+  salones                 salones[]
+  users                   users[]
+  psicologos              psicologos[]
+  talleres                talleres[]
+  tdis                    tdis[]
+  solicitudes_validacion  solicitudes_validacion[]
+  posts                   posts[]
+  inscripciones_taller    inscripciones_taller[]
+  inscripciones_tdi       inscripciones_tdi[]
+  justificantes           Justificante[]
+}
+
 model carreras {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre     String
-  division   String
-  data       Json?
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  grado      Int
-  area_id    Int?
-  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  data           Json?
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model grupos {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre     String
-  grado      Int
-  carrera    String
-  division   String
-  data       Json?
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  area_id    Int?
-  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  grado          Int
+  carrera        String
+
+  data           Json?
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model horarios {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombregrupo String
-  data        Json
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
-  area_id     Int?
-  areas       areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombregrupo    String
+  data           Json
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model horarios_profes {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String
-  data       Json
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  data           Json
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model materias {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre       String
-  carrera      String
-  grado        Int
-  data         Json?
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
-  horas_semana Int
-  salones      Json?     @default("[]")
-  area_id      Int?
-  areas        areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  carrera        String
+  grado          Int
+  data           Json?
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  horas_semana   Int
+  salones        Json?        @default("[]")
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model profesores {
-  profesor_id    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profesor_id    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre         String
   apellidos      String
   email          String
-  can_be_tutor   Boolean?  @default(false)
-  materias       Json?     @default("[]")
-  metadata       Json?     @default("{}")
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
-  area_id        Int?
+  can_be_tutor   Boolean?     @default(false)
+  materias       Json?        @default("[]")
+  metadata       Json?        @default("{}")
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
   disponibilidad Json?
-  areas          areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model salones {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre     String
-  data       Json?
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  division   String
-  area_id    Int?
-  areas      areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  data           Json?
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model users {
-  id            String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String                 @unique
-  password_hash String
-  full_name     String?
-  role          String?                @default("user")
-  created_at    DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime?              @default(now()) @db.Timestamptz(6)
-  metadata      Json?                  @default("{}")
-  area_id       Int?
-  activo        Boolean?               @default(true)
-  comments      post_comments[]
-  reactions     post_reactions[]
+  id                 String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String                 @unique
+  password_hash  String?  
+
+  role           String?       @default("user")
+  authProvider   String?       @default("local") 
+  full_name          String?
+  created_at         DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?              @default(now()) @db.Timestamptz(6)
+  metadata           Json?                  @default("{}")
+  activo             Boolean?               @default(true)
+  organizacionId     String?
+  organizacion       Organizacion?           @relation(fields: [organizacionId], references: [id])
+  inscripciones      inscripciones_taller[]
   inscripciones_tdis inscripciones_tdi[]
-  posts         posts[]
-  inscripciones inscripciones_taller[]
-  justificantes Justificante[]
-  areas         areas?                 @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  justificantes      Justificante[]
+  comments           post_comments[]
+  reactions          post_reactions[]
+  posts              posts[]
+
+  @@index([organizacionId])
 }
 
 model posts {
-  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  titulo        String
-  descripcion   String
-  imagen_url    String?
-  creator_id    String           @db.Uuid
-  score         Int              @default(0)
-  upvotes       Int              @default(0)
-  downvotes     Int              @default(0)
-  comment_count Int              @default(0)
-  view_count    Int              @default(0)
-  status        String           @default("active")
-  expires_at    DateTime?        @db.Timestamptz(6)
-  deleted       Boolean          @default(false)
-  created_at    DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
-  comments      post_comments[]
-  reactions     post_reactions[]
-  creator       users            @relation(fields: [creator_id], references: [id], onUpdate: NoAction, map: "fk_posts_creator")
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titulo         String
+  descripcion    String
+  imagen_url     String?
+  creator_id     String           @db.Uuid
+  score          Int              @default(0)
+  upvotes        Int              @default(0)
+  downvotes      Int              @default(0)
+  comment_count  Int              @default(0)
+  view_count     Int              @default(0)
+  status         String           @default("active")
+  expires_at     DateTime?        @db.Timestamptz(6)
+  deleted        Boolean          @default(false)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @updatedAt @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion     @relation(fields: [organizacionId], references: [id])
+  comments       post_comments[]
+  reactions      post_reactions[]
+  creator        users            @relation(fields: [creator_id], references: [id], onUpdate: NoAction, map: "fk_posts_creator")
 
+  @@index([organizacionId])
   @@index([created_at], map: "idx_posts_created_at")
   @@index([expires_at], map: "idx_posts_expires_at")
   @@index([score, created_at], map: "idx_posts_score_created_at")
@@ -156,62 +199,49 @@ model post_reactions {
   @@unique([post_id, user_id], map: "unique_post_user")
 }
 
-model areas {
-  id         Int          @id @default(autoincrement())
-  nombre     String       @unique
-  carreras   carreras[]
-  grupos     grupos[]
-  horarios   horarios[]
-  materias   materias[]
-  profesores profesores[]
-  salones    salones[]
-  users      users[]
-  psicologos psicologos[]
-}
-
 model psicologos {
-  psicologo_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  nombre    String
-  apellidos String
-  email     String
-
-  area_id Int?
-  areas   areas? @relation(fields: [area_id], references: [id])
-
+  psicologo_id   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  apellidos      String
+  email          String
   disponibilidad Json
-  metadata       Json?     @default("{}")
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  metadata       Json?        @default("{}")
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  @@index([organizacionId])
 }
 
 model talleres {
-  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre      String
-  descripcion String?
+  id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  descripcion    String?
+  created_at     DateTime?              @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion           @relation(fields: [organizacionId], references: [id])
+  inscripciones  inscripciones_taller[]
 
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-
-  inscripciones inscripciones_taller[]
+  @@index([organizacionId])
 }
 
 model inscripciones_taller {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  taller_id String @db.Uuid
-  alumno_id String @db.Uuid
-
-  taller talleres @relation(fields: [taller_id], references: [id])
-  alumno users    @relation(fields: [alumno_id], references: [id])
-
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taller_id      String       @db.Uuid
+  alumno_id      String       @db.Uuid
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+  alumno         users        @relation(fields: [alumno_id], references: [id])
+  taller         talleres     @relation(fields: [taller_id], references: [id])
 
   @@unique([taller_id, alumno_id])
+  @@index([organizacionId])
 }
 
-
 model tdis {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   eje               String
   nombre            String
   persona_encargada String
@@ -223,71 +253,79 @@ model tdis {
   horas_requeridas  Int
   nivel_de_impacto  String
   tdis_por_ganar    Int
-  activo            Boolean  @default(true)
+  activo            Boolean             @default(true)
   competencias      String
   evidencias        String
-  inscripciones inscripciones_tdi[]
   observaciones     String
-  created_at        DateTime @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime @updatedAt @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @updatedAt @db.Timestamptz(6)
+  organizacionId    String
+  organizacion      Organizacion        @relation(fields: [organizacionId], references: [id])
+  inscripciones     inscripciones_tdi[]
+
+  @@index([organizacionId])
 }
 
 model solicitudes_validacion {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matricula          String
-  nombre_solicitud   String
-  correo_alumno      String
-  eje                String
-  persona_encargada  String
-  puesto             String
-  telefono           String
-  extension          String?
-  correo             String
-  tipo               String
-  horas_requeridas   Int
-  nivel_de_impacto   String
-  tdis_por_ganar     Int
-  competencias       String
-  evidencias         String
-  observaciones      String
-  estado             String   @default("Pendiente")
-  created_at         DateTime @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime @updatedAt @db.Timestamptz(6)
-}
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matricula         String
+  nombre_solicitud  String
+  correo_alumno     String
+  eje               String
+  persona_encargada String
+  puesto            String
+  telefono          String
+  extension         String?
+  correo            String
+  tipo              String
+  horas_requeridas  Int
+  nivel_de_impacto  String
+  tdis_por_ganar    Int
+  competencias      String
+  evidencias        String
+  observaciones     String
+  estado            String       @default("Pendiente")
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime     @updatedAt @db.Timestamptz(6)
+  organizacionId    String
+  organizacion      Organizacion @relation(fields: [organizacionId], references: [id])
 
+  @@index([organizacionId])
+}
 
 model inscripciones_tdi {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tdi_id         String    @db.Uuid
-  alumno_id      String    @db.Uuid
-
-  estado         String    @default("inscrito") // inscrito | en_proceso | finalizado | rechazado
-  evidencia_url  String?   // link a Drive, igual que justificantes
-  comentario_admin String?
-
-  fecha_inscripcion DateTime  @default(now()) @db.Timestamptz(6)
-  fecha_finalizacion DateTime? @db.Timestamptz(6)
-
-  tdi     tdis   @relation(fields: [tdi_id], references: [id])
-  alumno  users  @relation(fields: [alumno_id], references: [id])
+  id                 String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tdi_id             String       @db.Uuid
+  alumno_id          String       @db.Uuid
+  estado             String       @default("inscrito")
+  evidencia_url      String?
+  comentario_admin   String?
+  fecha_inscripcion  DateTime     @default(now()) @db.Timestamptz(6)
+  fecha_finalizacion DateTime?    @db.Timestamptz(6)
+  organizacionId     String
+  organizacion       Organizacion @relation(fields: [organizacionId], references: [id])
+  alumno             users        @relation(fields: [alumno_id], references: [id])
+  tdi                tdis         @relation(fields: [tdi_id], references: [id])
 
   @@unique([tdi_id, alumno_id])
+  @@index([organizacionId])
 }
 
-
 model Justificante {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  usuarioId        String   @db.Uuid
-  motivo           String
-  fecha            DateTime
-  driveUrl         String
-  estado           EstadoJustificante @default(pendiente)
-  comentarioAdmin  String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  motivo          String
+  comentarioAdmin String?
+  createdAt       DateTime           @default(now())
+  driveUrl        String
+  fecha           DateTime
+  updatedAt       DateTime           @updatedAt
+  estado          EstadoJustificante @default(pendiente)
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId       String             @db.Uuid
+  organizacionId  String
+  organizacion    Organizacion       @relation(fields: [organizacionId], references: [id])
+  usuario         users              @relation(fields: [usuarioId], references: [id])
 
-  usuario          users    @relation(fields: [usuarioId], references: [id])
-
+  @@index([organizacionId])
   @@map("justificantes")
 }
 

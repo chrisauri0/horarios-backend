@@ -1,54 +1,55 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ProfesoresService } from './profesores.service';
-import { Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
-import { UseGuards } from '@nestjs/common';
-import { RolesGuard } from '../auth/roles/roles.guard';
-import { get } from 'http';
 
-
-  
-// @UseGuards(RolesGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('profesores')
 export class ProfesoresController {
   constructor(private readonly profesoresService: ProfesoresService) {}
 
   @Get()
-  async getAll() {
-    return this.profesoresService.findAll();
+  async getAll(@Req() req: any) {
+    return this.profesoresService.findAllByOrg(req.user.organizacionId);
   }
-  
+
   @Get('/movil')
-  async getAllMovil() {
-    return this.profesoresService.findAllMovil();
+  async getAllMovil(@Req() req: any) {
+    return this.profesoresService.findAllMovil(req.user.organizacionId);
   }
-  
+
   @Get('/tutores')
-  async getAllTutors() {
-    return this.profesoresService.findAllTutors();
+  async getAllTutors(@Req() req: any) {
+    return this.profesoresService.findAllTutors(req.user.organizacionId);
   }
 
   @Get(':id')
-  async getById(@Param('id') profesor_id: string) {
-    return this.profesoresService.findById(profesor_id);
+  async getById(@Req() req: any, @Param('id') profesor_id: string) {
+    return this.profesoresService.findById(req.user.organizacionId, profesor_id);
   }
 
-
   @Post()
-  async create(@Body() body: {
-    nombre: string;
-    apellidos: string;
-    email: string;
-    can_be_tutor?: boolean;
-    materias?: object;
-    metadata?: object;
-    min_hora: number;
-    disponibilidad?: object;
-  }) {
-    return this.profesoresService.create(body);
+  async create(
+    @Req() req: any,
+    @Body() body: {
+      nombre: string;
+      apellidos: string;
+      email: string;
+      can_be_tutor?: boolean;
+      materias?: object;
+      metadata?: object;
+      disponibilidad?: object;
+    },
+    // 👆 quité organizacionId de aquí: nunca debe venir del cliente
+  ) {
+    return this.profesoresService.create({
+      ...body,
+      organizacionId: req.user.organizacionId, // 👈 siempre del JWT
+    });
   }
 
   @Patch(':id')
   async update(
+    @Req() req: any,
     @Param('id') profesor_id: string,
     @Body() body: Partial<{
       nombre: string;
@@ -57,15 +58,14 @@ export class ProfesoresController {
       can_be_tutor?: boolean;
       materias?: object;
       metadata?: object;
-      min_hora: number;
       disponibilidad?: object;
-    }>
+    }>,
   ) {
-    return this.profesoresService.update(profesor_id, body);
+    return this.profesoresService.update(req.user.organizacionId, profesor_id, body);
   }
 
   @Delete(':id')
-  async delete(@Param('id') profesor_id: string) {
-    return this.profesoresService.delete(profesor_id);
+  async delete(@Req() req: any, @Param('id') profesor_id: string) {
+    return this.profesoresService.delete(req.user.organizacionId, profesor_id);
   }
 }

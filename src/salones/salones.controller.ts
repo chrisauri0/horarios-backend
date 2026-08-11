@@ -1,48 +1,47 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { SalonesService } from './salones.service';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../auth/roles/roles.guard';
-import { Roles } from '../auth/roles/roles.decorador';
 
 @Controller('salones')
-// @UseGuards(AuthGuard('jwt'), RolesGuard) 
+@UseGuards(AuthGuard('jwt')) // 👈 activado
 export class SalonesController {
   constructor(private readonly salonesService: SalonesService) {}
 
   @Get()
-  @Roles('administrador') // Solo admins
-  async getAll() {
-    return this.salonesService.findAll();
+  async getAll(@Req() req: any) {
+    return this.salonesService.findAllByOrg(req.user.organizacionId); // 👈 filtra por organización
   }
 
   @Get(':id')
-  // @Roles('administrador')
-  async getById(@Param('id') id: string) {
-    return this.salonesService.findById(id);
+  async getById(@Req() req: any, @Param('id') id: string) {
+    return this.salonesService.findById(req.user.organizacionId, id); // 👈 protege también la lectura individual
   }
 
   @Post()
-  // @Roles('administrador')
-  async create(@Body() body: { nombre: string; data: object; division: string }) {
-    const exists = await this.salonesService.findByNombreYEdificio(body.nombre);
+  async create(@Req() req: any, @Body() body: { nombre: string; data?: object }) {
+    const exists = await this.salonesService.findByNombreYEdificio(req.user.organizacionId, body.nombre);
     if (exists) {
       return { error: 'Ya existe un salón con ese nombre.' };
     }
-    return this.salonesService.create(body);
+    return this.salonesService.create({
+      nombre: body.nombre,
+      data: body.data,
+      organizacionId: req.user.organizacionId, // 👈 siempre del JWT, nunca del body
+    });
   }
 
   @Patch(':id')
-  // @Roles('administrador')
   async update(
+    @Req() req: any,
     @Param('id') id: string,
-    @Body() body: Partial<{ nombre: string; data: object; division: string }>,
+    @Body() body: Partial<{ nombre: string; data: object }>,
+    // 👆 quité organizacionId de aquí: nunca debe venir del cliente
   ) {
-    return this.salonesService.update(id, body);
+    return this.salonesService.update(req.user.organizacionId, id, body);
   }
 
   @Delete(':id')
-  // @Roles('administrador')
-  async delete(@Param('id') id: string) {
-    return this.salonesService.delete(id);
+  async delete(@Req() req: any, @Param('id') id: string) {
+    return this.salonesService.delete(req.user.organizacionId, id);
   }
 }

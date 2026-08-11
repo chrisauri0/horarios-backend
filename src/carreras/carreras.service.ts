@@ -1,41 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
 
 
+
+// carreras.service.ts
 @Injectable()
 export class CarrerasService {
-  constructor(private prisma: PrismaService) {}
-
-  async findAll() {
-    return this.prisma.carreras.findMany();
-  }
-  async findById(id: string) {
-    return this.prisma.carreras.findUnique({
-      where: { id },
-    });
-  }
-  
-  async findByNombre(nombre: string) {
-    return this.prisma.carreras.findMany({
-      where: { nombre },
-    });
+  findAll(prisma: any) { // idealmente tipa esto con el tipo real del extended client
+    return prisma.carreras.findMany();
   }
 
-  async create(data: { nombre: string;  division: string, grado :number }) {
-    return this.prisma.carreras.create({
-      data,
-    });
-  }
-  async update(id: string, data: Partial<{ nombre: string; division: string, grado :number }>) {
-    return this.prisma.carreras.update({
-      where: { id },
-      data,
-    });
+  findById(prisma: any, id: string) {
+    return prisma.carreras.findFirst({ where: { id } }); // el extension ya agrega el organizacionId automático
   }
 
-  async delete(id: string) {
-    return this.prisma.carreras.delete({
-      where: { id },
-    });
+  findByNombre(prisma: any, nombre: string) {
+    return prisma.carreras.findMany({ where: { nombre } });
+  }
+
+  create(prisma: any, dto: { nombre: string;   }, organizacionId: string) {
+    return prisma.carreras.create({ data: { ...dto, organizacionId } }); // el extension también inyecta esto en create, pero pasarlo explícito no hace daño
+  }
+
+  update(prisma: any, id: string, dto: Partial<{ nombre: string;   }>) {
+    return prisma.carreras.update({ where: { id }, data: dto });
+  }
+
+  delete(prisma: any, id: string) {
+    return prisma.carreras.delete({ where: { id } });
   }
 }

@@ -38,6 +38,7 @@ export class HorariosService {
     async create(data: {
         nombregrupo: string;
         data: object;
+        organizacionId: string;
     }) {
         return this.prisma.horarios.create({
             data,
@@ -47,6 +48,7 @@ export class HorariosService {
     async update(id: string, data: Partial<{
         nombregrupo: string;
         data: object;
+        organizacionId: string;
     }>) {
         return this.prisma.horarios.update({
             where: { id },

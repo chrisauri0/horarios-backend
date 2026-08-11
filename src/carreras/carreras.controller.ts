@@ -1,33 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CarrerasService } from './carreras.service';
+import { PrismaTenantService } from '../auth/prisma-tenant.service';
 
 @Controller('carreras')
+@UseGuards(AuthGuard('jwt')) 
+
 export class CarrerasController {
-  constructor(private readonly carrerasService: CarrerasService) {}
+  constructor(
+    private readonly carrerasService: CarrerasService,
+    private readonly prismaTenant: PrismaTenantService,
+  ) {}
+
   @Get()
-  findAll() {
-    return this.carrerasService.findAll();
-  } 
-  @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.carrerasService.findById(id);
+  findAll(@Req() req: any) {
+    const tenantPrisma = this.prismaTenant.forTenant(req.user.organizacionId); // 👈 organizacionId, no areaId
+    return this.carrerasService.findAll(tenantPrisma);
   }
+
+  @Get(':id')
+  findById(@Req() req: any, @Param('id') id: string) {
+    const tenantPrisma = this.prismaTenant.forTenant(req.user.organizacionId);
+    return this.carrerasService.findById(tenantPrisma, id); // 👈 ahora también scopeado por tenant
+  }
+
   @Post()
-  async create(@Body() createCarreraDto: { nombre: string; division: string, grado :number }) {
-  
-    const existentes = await this.carrerasService.findByNombre(createCarreraDto.nombre);
+  async create(
+    @Req() req: any,
+    @Body() createCarreraDto: { nombre: string;   },
+    
+  ) {
+    const tenantPrisma = this.prismaTenant.forTenant(req.user.organizacionId);
+
+    const existentes = await this.carrerasService.findByNombre(tenantPrisma, createCarreraDto.nombre);
     if (existentes && existentes.length > 0) {
       return { error: 'Ya existe una carrera con ese nombre.' };
     }
-    return this.carrerasService.create(createCarreraDto);
-  }
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCarreraDto: Partial<{ nombre: string; division: string, grado :number }>) {
-    return this.carrerasService.update(id, updateCarreraDto);
-  }
-  @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.carrerasService.delete(id);
+    return this.carrerasService.create(tenantPrisma, createCarreraDto, req.user.organizacionId);
   }
 
+  @Patch(':id')
+  update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() updateCarreraDto: Partial<{ nombre: string;  }>,
+  ) {
+    const tenantPrisma = this.prismaTenant.forTenant(req.user.organizacionId);
+    return this.carrerasService.update(tenantPrisma, id, updateCarreraDto);
+  }
+
+  @Delete(':id')
+  delete(@Req() req: any, @Param('id') id: string) {
+    const tenantPrisma = this.prismaTenant.forTenant(req.user.organizacionId);
+    return this.carrerasService.delete(tenantPrisma, id);
+  }
 }

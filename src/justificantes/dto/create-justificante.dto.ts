@@ -11,4 +11,8 @@ export class CreateJustificanteDto {
 
   @IsDateString()
   fecha!: string ;
+
+  @IsString()
+  @IsNotEmpty()
+  organizacionId!: string ;
 }

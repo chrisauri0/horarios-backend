@@ -1,77 +1,76 @@
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
 export class ProfesoresService {
-    constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
-    async findAllTutors() {
-        console.log('→ Ejecutando findAllTutors');
-        return this.prisma.profesores.findMany({
-            where: { can_be_tutor: true },
-        });
-    }
+  async findAllTutors(organizacionId: string) {
+    return this.prisma.profesores.findMany({
+      where: { can_be_tutor: true, organizacionId },
+    });
+  }
 
-        async findAll() {
-        return this.prisma.profesores.findMany();
-    }
+  async findAllByOrg(organizacionId: string) {
+    return this.prisma.profesores.findMany({ where: { organizacionId } });
+  }
 
-async findAllMovil() {
-  return this.prisma.profesores.findMany({
-    select: {
+  async findAllMovil(organizacionId: string) {
+    return this.prisma.profesores.findMany({
+      where: { organizacionId },
+      select: {
         nombre: true,
         apellidos: true,
         email: true
-      // agrega los campos que quieras devolver
+      }
+    });
+  }
+
+  async findById(organizacionId: string, id: string) {
+    return this.prisma.profesores.findFirst({
+      where: { profesor_id: id, organizacionId },
+    });
+  }
+
+  async create(data: {
+    nombre: string;
+    apellidos: string;
+    email: string;
+    can_be_tutor?: boolean;
+    materias?: object;
+    metadata?: object;
+    disponibilidad?: object;
+    organizacionId: string;
+  }) {
+    return this.prisma.profesores.create({
+      data,
+    });
+  }
+
+  async update(
+    organizacionId: string,
+    id: string,
+    data: Partial<{
+      nombre: string;
+      apellidos: string;
+      email: string;
+      can_be_tutor?: boolean;
+      materias?: object;
+      metadata?: object;
+      disponibilidad?: object;
+    }>,
+  ) {
+    const profesor = await this.prisma.profesores.findFirst({ where: { profesor_id: id, organizacionId } });
+    if (!profesor) {
+      throw new BadRequestException('Profesor no encontrado en esta organización');
     }
-  });
-}
+    return this.prisma.profesores.update({
+      where: { profesor_id: id },
+      data,
+    });
+  }
 
-
-    async findById(id: string) {
-        console.log('→ Ejecutando findById con id:', id);
-        return this.prisma.profesores.findUnique({
-            where: { profesor_id: id },
-        });
-    }
-
-
-    async create(data: {
-        nombre: string;
-        apellidos: string;
-        email: string;
-        can_be_tutor?: boolean;
-        materias?: object;
-        metadata?: object;
-        min_hora: number;
-        disponibilidad?: object;
-    }) {
-        return this.prisma.profesores.create({
-            data,
-        });
-    }
-
-    async update(id: string, data: Partial<{
-        nombre: string;
-        apellidos: string;
-        email: string;
-        can_be_tutor?: boolean;
-        materias?: object;
-        metadata?: object;
-        min_hora: number;
-        disponibilidad?: object;
-
-    }>) {
-        return this.prisma.profesores.update({
-            where: { profesor_id: id },
-            data,
-        });
-    }
-
-    async delete(id: string) {
-        return this.prisma.profesores.delete({
-            where: { profesor_id: id },
-        });
-    }
+  async delete(organizacionId: string, id: string) {
+    return this.prisma.profesores.deleteMany({ where: { profesor_id: id, organizacionId } });
+  }
 }

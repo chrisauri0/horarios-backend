@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersModule } from '../users/users.module';
+import { GoogleAuthService } from './google-auth.service';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { UsersModule } from '../users/users.module';
       signOptions: { expiresIn: '4h' },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleAuthService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule, GoogleAuthService],
 })
 export class AuthModule {}

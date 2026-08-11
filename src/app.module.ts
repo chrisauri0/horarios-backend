@@ -20,6 +20,7 @@ import { TdisModule } from './tdis/tdis.module';
 import { SolicitudesModule } from './solicitudes/solicitudes.module';
 import { AlumnosModule } from './alumnos/alumnos.module';
 import { JustificantesModule } from './justificantes/justificantes.module';
+import { PrismaTenantModule } from './auth/prisma-tenant.module';
 
 
 @Module({
@@ -30,6 +31,8 @@ import { JustificantesModule } from './justificantes/justificantes.module';
     }),
 PrismaModule,
     DatabaseModule,
+    PrismaTenantModule,
+    
 
     UsersModule,
 
