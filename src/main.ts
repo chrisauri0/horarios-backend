@@ -6,7 +6,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'http://localhost:4200',                          
-    'https://tu-frontend.netlify.app',               
+    'https://horari-uteq.netlify.app',               
   ];
 
   app.enableCors({
