@@ -1,5 +1,6 @@
-import { Controller, Post,Get, Req, Body } from '@nestjs/common';
+import { Controller, Post, Get, Req, Body, UseGuards } from '@nestjs/common';
 import { SchedulerService } from './scheduler.service';
+import { AuthGuard } from '@nestjs/passport';
 
 type GenerateSchedulePayload = {
   grupos: unknown[];
@@ -19,21 +20,23 @@ type SaveSchedulesBody = SaveSchedulesPayload | Array<Record<string, unknown>>;
 export class SchedulerController {
   constructor(private readonly schedulerService: SchedulerService) {}
 
-// scheduler.controller.ts
-@Post('generar')
-generateSchedule(@Req() req: any, @Body() payload: GenerateSchedulePayload) {
-  return this.schedulerService.generateSchedule(payload, req.user.organizacionId);
-}
+  @UseGuards(AuthGuard('jwt'))
+  @Post('generar')
+  generateSchedule(@Req() req: any, @Body() payload: GenerateSchedulePayload) {
+    return this.schedulerService.generateSchedule(payload, req.user.organizacionId);
+  }
 
-@Post('guardar')
-saveSchedules(@Req() req: any, @Body() payload: SaveSchedulesPayload) {
-  return this.schedulerService.saveSchedules(payload, req.user.organizacionId);
-}
+  @UseGuards(AuthGuard('jwt'))
+  @Post('guardar')
+  saveSchedules(@Req() req: any, @Body() payload: SaveSchedulesPayload) {
+    return this.schedulerService.saveSchedules(payload, req.user.organizacionId);
+  }
 
-@Get()
-getAllSchedules(@Req() req: any) {
-  return this.schedulerService.getAllSchedules(req.user.organizacionId);
-}
+  @UseGuards(AuthGuard('jwt'))
+  @Get()
+  getAllSchedules(@Req() req: any) {
+    return this.schedulerService.getAllSchedules(req.user.organizacionId);
+  }
 
   @Get('subjectsschedules')
   async getSubjectsSchedules() {
