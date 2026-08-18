@@ -169,7 +169,7 @@ export class SchedulerService {
     let response;
     try {
       response = await this.httpService.axiosRef.post(
-        'http://localhost:8000/generar-horario',
+        'https://ortools-horarios.onrender.com:8000/generar-horario',
         payload,
       );
     } catch (err: any) {
