@@ -109,7 +109,7 @@ async cambiarPassword(
     // Si el correo no es válido o no es de UTEQ, verificarToken ya lanzó UnauthorizedException
 
     let user = await this.usersService.findByEmail(datosGoogle.email);
-
+    const ORGANIZACION_DEFAULT_ID =   "04e0c572-a5f7-4aef-99d8-c52647753b9f"; // 👈 reemplaza con el ID de tu organización por defecto
     if (!user) {
       // Usuario nuevo: se crea SIN organizacionId (queda pendiente de asignación)
       user = await this.usersService.create({
@@ -117,7 +117,7 @@ async cambiarPassword(
         passwordHash: undefined, // no aplica, login solo por Google
         fullName: datosGoogle.nombre,
         role: 'alumno',
-        organizacionId: undefined,
+        organizacionId: ORGANIZACION_DEFAULT_ID, // 👈 asigna la organización por defecto
         authProvider: 'google', // 👈 requiere agregar este campo al schema, ver abajo
       });
     }

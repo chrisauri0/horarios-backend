@@ -257,12 +257,36 @@ model tdis {
   competencias      String
   evidencias        String
   observaciones     String
+  cupo_maximo       Int?                // 👈 nuevo
+  cupo_actual       Int                 @default(0) // 👈 nuevo
+  fecha             DateTime?           // 👈 nuevo
+  lugar             String?             // 👈 nuevo
+  emoji             String?             // 👈 nuevo
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   updated_at        DateTime            @updatedAt @db.Timestamptz(6)
   organizacionId    String
   organizacion      Organizacion        @relation(fields: [organizacionId], references: [id])
   inscripciones     inscripciones_tdi[]
 
+  @@index([organizacionId])
+}
+
+model inscripciones_tdi {
+  id                 String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tdi_id             String       @db.Uuid
+  alumno_id          String       @db.Uuid
+  estado             String       @default("inscrito")
+  evidencia_url      String?
+  nota_alumno        String?      // 👈 nuevo: descripción que el alumno escribe al subir evidencia
+  comentario_admin   String?
+  fecha_inscripcion  DateTime     @default(now()) @db.Timestamptz(6)
+  fecha_finalizacion DateTime?    @db.Timestamptz(6)
+  organizacionId     String
+  organizacion       Organizacion @relation(fields: [organizacionId], references: [id])
+  alumno             users        @relation(fields: [alumno_id], references: [id])
+  tdi                tdis         @relation(fields: [tdi_id], references: [id])
+
+  @@unique([tdi_id, alumno_id])
   @@index([organizacionId])
 }
 
@@ -293,23 +317,7 @@ model solicitudes_validacion {
   @@index([organizacionId])
 }
 
-model inscripciones_tdi {
-  id                 String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tdi_id             String       @db.Uuid
-  alumno_id          String       @db.Uuid
-  estado             String       @default("inscrito")
-  evidencia_url      String?
-  comentario_admin   String?
-  fecha_inscripcion  DateTime     @default(now()) @db.Timestamptz(6)
-  fecha_finalizacion DateTime?    @db.Timestamptz(6)
-  organizacionId     String
-  organizacion       Organizacion @relation(fields: [organizacionId], references: [id])
-  alumno             users        @relation(fields: [alumno_id], references: [id])
-  tdi                tdis         @relation(fields: [tdi_id], references: [id])
 
-  @@unique([tdi_id, alumno_id])
-  @@index([organizacionId])
-}
 
 model Justificante {
   motivo          String

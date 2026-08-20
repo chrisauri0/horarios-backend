@@ -21,6 +21,8 @@ import { SolicitudesModule } from './solicitudes/solicitudes.module';
 import { AlumnosModule } from './alumnos/alumnos.module';
 import { JustificantesModule } from './justificantes/justificantes.module';
 import { PrismaTenantModule } from './auth/prisma-tenant.module';
+import { SolicitudesValidacionModule } from './solicitudes-validacion/solicitudes-validacion.module';
+import { InscripcionesTdiModule } from './inscripciones-tdi/inscripciones-tdi.module';
 
 
 @Module({
@@ -37,6 +39,8 @@ PrismaModule,
     UsersModule,
 
     GruposModule,
+    InscripcionesTdiModule,
+  SolicitudesValidacionModule,
 
     ProfesoresModule,
 

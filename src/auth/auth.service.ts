@@ -51,21 +51,21 @@ async login(email: string, password: string) {
 }
 
 
-   async generarTokenParaUsuario(user: {
-    id: string;
-    email: string;
-    organizacionId: string | null;
-    full_name: string | null;
-  }) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      organizacionId: user.organizacionId,
-      nombre: user.full_name,
-    };
+async generarTokenParaUsuario(user: {
+  id: string;
+  email: string;
+  organizacionId: string | null;
+  full_name: string | null;
+  role: string | null;
+}): Promise<string> {
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    organizacionId: user.organizacionId,
+    nombre: user.full_name,
+    role: user.role,
+  };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+  return this.jwtService.sign(payload); // 👈 regresa el string directo
+}
 }
