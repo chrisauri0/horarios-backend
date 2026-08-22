@@ -1,4 +1,5 @@
 import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator";
+import { IsDateString, Min } from "class-validator";
 
 export class CreateTdiDto {
   @IsString() eje!: string;
@@ -16,4 +17,8 @@ export class CreateTdiDto {
   @IsString() competencias!: string;
   @IsString() evidencias!: string;
   @IsString() observaciones!: string;
+   @IsOptional() @IsInt() @Min(1) cupoMaximo?: number;
+  @IsOptional() @IsDateString() fecha?: string;
+  @IsOptional() @IsString() lugar?: string;
+  @IsOptional() @IsString() emoji?: string;
 }
